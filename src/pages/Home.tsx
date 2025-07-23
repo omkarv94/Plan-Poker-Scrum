@@ -5,7 +5,7 @@ import Header from "../components/Header";
 import PlayerList from "../components/PlayerList";
 import Card from "../components/Card";
 
-const cards = ["1", "2", "3", "5", "8", "13", "?"];
+const cards = ["1", "1.5", "2", "3", "4", "5", "8", "13","?"];
 
 export default function Home() {
   const [name, setName] = useState<string | null>(null);
@@ -26,7 +26,6 @@ export default function Home() {
     }
   }, []);
 
-  // Listen for players
   useEffect(() => {
     const playersRef = ref(db, "players");
     const unsub = onValue(playersRef, (snapshot) => {
@@ -44,7 +43,6 @@ export default function Home() {
     return () => unsub();
   }, []);
 
-  // Listen for revealed flag
   useEffect(() => {
     const revealedRef = ref(db, "revealed");
     return onValue(revealedRef, (snapshot) => {
@@ -83,23 +81,40 @@ export default function Home() {
       <div className="backdrop-blur-sm min-h-screen bg-black/70">
         <Header />
         <div className="p-4 text-center">
-          <div className="mb-2">Hi, {name}</div>
-          <div className="flex justify-center flex-wrap gap-3 mb-4">
+          <div className="mb-2 text-xl">Hi, {name}</div>
+
+          {/* Cards with larger width and more spacing */}
+          <div className="flex justify-center flex-wrap gap-5 mb-6">
             {cards.map((c) => (
               <Card key={c} value={c} onClick={() => handleVote(c)} selected={myVote === c} />
             ))}
           </div>
-          <button onClick={handleReveal} className="bg-green-600 px-4 py-2 rounded mr-2">
-            Reveal
-          </button>
-          <button onClick={handleReset} className="bg-red-600 px-4 py-2 rounded mr-2">
-            Reset
-          </button>
-          <button onClick={signOut} className="bg-gray-600 px-4 py-2 rounded">
-            Sign Out
-          </button>
+
+          {/* Buttons */}
+          <div className="mb-6">
+            <button onClick={handleReveal} className="bg-green-600 px-4 py-2 rounded mr-2">
+              Reveal
+            </button>
+            <button onClick={handleReset} className="bg-red-600 px-4 py-2 rounded mr-2">
+              Reset
+            </button>
+            <button onClick={signOut} className="bg-gray-600 px-4 py-2 rounded">
+              Sign Out
+            </button>
+          </div>
+
+          {/* Horizontal line */}
+          <hr className="border-t border-gray-500 my-6" />
+
+          {/* Description */}
+          <p className="text-sm text-gray-300 mt-2">
+            Only those who voted will appear. Click <strong>Reveal</strong> to show votes.
+          </p>
+
+          {/* Players List */}
+          <PlayerList players={players.filter((p) => p.vote)} revealed={revealed} />
+
         </div>
-        <PlayerList players={players.filter((p) => p.vote)} revealed={revealed} />
       </div>
     </div>
   );
