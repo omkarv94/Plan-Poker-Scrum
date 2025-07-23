@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { ref, onValue, set, remove } from "firebase/database";
+import { db } from "../lib/firebase";
 import Header from "../components/Header";
 import PlayerList from "../components/PlayerList";
 import Card from "../components/Card";
@@ -11,7 +13,6 @@ export default function Home() {
   const [myVote, setMyVote] = useState<string | null>(null);
   const [revealed, setRevealed] = useState(false);
 
-  // Prompt for name once
   useEffect(() => {
     const storedName = localStorage.getItem("pokerName");
     if (!storedName) {
@@ -25,21 +26,47 @@ export default function Home() {
     }
   }, []);
 
-  // Update player list with your vote
+  // Listen for players
   useEffect(() => {
-    if (name) {
-      const updated = [...players.filter(p => p.name !== name), { name, vote: myVote }];
-      setPlayers(updated);
-    }
-  }, [myVote]);
+    const playersRef = ref(db, "players");
+    const unsub = onValue(playersRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        const list = Object.keys(data).map((key) => ({
+          name: key,
+          vote: data[key].vote ?? undefined,
+        }));
+        setPlayers(list);
+      } else {
+        setPlayers([]);
+      }
+    });
+    return () => unsub();
+  }, []);
+
+  // Listen for revealed flag
+  useEffect(() => {
+    const revealedRef = ref(db, "revealed");
+    return onValue(revealedRef, (snapshot) => {
+      setRevealed(!!snapshot.val());
+    });
+  }, []);
 
   const handleVote = (v: string) => {
     setMyVote(v);
+    if (name) {
+      set(ref(db, `players/${name}`), { vote: v });
+    }
   };
 
-  const reset = () => {
+  const handleReveal = () => {
+    set(ref(db, "revealed"), true);
+  };
+
+  const handleReset = () => {
     setRevealed(false);
-    setPlayers(players.map(p => ({ ...p, vote: undefined })));
+    set(ref(db, "revealed"), false);
+    remove(ref(db, "players"));
     setMyVote(null);
   };
 
@@ -49,32 +76,30 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-cover bg-center text-white" style={{ backgroundImage: `url('/bg.jpg')` }}>
-      <div className="backdrop-blur-sm min-h-screen bg-black/60">
+    <div
+      className="min-h-screen bg-cover bg-center text-white"
+      style={{ backgroundImage: `url('/batman-bg.jpg')` }}
+    >
+      <div className="backdrop-blur-sm min-h-screen bg-black/70">
         <Header />
         <div className="p-4 text-center">
-          {/* Sign out button */}
-          <button
-            onClick={signOut}
-            className="absolute top-4 right-4 bg-gray-700 hover:bg-gray-600 text-white px-3 py-1 rounded text-sm"
-          >
-            Sign Out
-          </button>
-
-          {/* Voting Cards */}
-          <div className="flex justify-center flex-wrap gap-3 mb-4 mt-8">
-            {cards.map(c => (
+          <div className="mb-2">Hi, {name}</div>
+          <div className="flex justify-center flex-wrap gap-3 mb-4">
+            {cards.map((c) => (
               <Card key={c} value={c} onClick={() => handleVote(c)} selected={myVote === c} />
             ))}
           </div>
-
-          {/* Action Buttons */}
-          <button onClick={() => setRevealed(true)} className="bg-green-600 px-4 py-2 rounded mr-2">Reveal</button>
-          <button onClick={reset} className="bg-red-600 px-4 py-2 rounded">Reset</button>
+          <button onClick={handleReveal} className="bg-green-600 px-4 py-2 rounded mr-2">
+            Reveal
+          </button>
+          <button onClick={handleReset} className="bg-red-600 px-4 py-2 rounded mr-2">
+            Reset
+          </button>
+          <button onClick={signOut} className="bg-gray-600 px-4 py-2 rounded">
+            Sign Out
+          </button>
         </div>
-
-        {/* Player List */}
-        <PlayerList players={players.filter(p => p.vote)} revealed={revealed} />
+        <PlayerList players={players.filter((p) => p.vote)} revealed={revealed} />
       </div>
     </div>
   );
