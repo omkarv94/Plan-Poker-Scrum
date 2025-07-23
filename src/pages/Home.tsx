@@ -5,7 +5,7 @@ import Header from "../components/Header";
 import PlayerList from "../components/PlayerList";
 import Card from "../components/Card";
 
-const cards = ["1", "1.5", "2", "3", "4", "5", "8", "13","?"];
+const cards = ["0.5","1", "1.5", "2", "3", "4", "5", "8", "13","?"];
 
 export default function Home() {
   const [name, setName] = useState<string | null>(null);
