@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
-import { ref, get } from "firebase/database";
+import { ref, get, set } from "firebase/database";
 import { db } from "../lib/firebase";
 
 export default function RoomSelector() {
@@ -10,8 +10,13 @@ export default function RoomSelector() {
   const [roomIdInput, setRoomIdInput] = useState("");
   const [error, setError] = useState("");
 
-  const handleCreateRoom = () => {
+  const handleCreateRoom = async () => {
     const newRoomId = uuidv4().split("-")[0]; // short room ID
+    await set(ref(db, `rooms/${newRoomId}`), {
+        createdAt: Date.now(),
+        revealed: false,
+        players: {}
+      });
     navigate(`/home/${newRoomId}`);
   };
 
@@ -34,17 +39,17 @@ export default function RoomSelector() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-900 text-white p-4">
-      <h1 className="text-3xl mb-6 font-bold">Plan Poker</h1>
+      <h1 className="text-3xl mb-6 font-bold">OPE Plan Poker</h1>
 
-      <div className="space-y-4 w-full max-w-xs">
+      <div className="space-y-4 w-full max-w-lg">
         <button
           onClick={handleCreateRoom}
-          className="w-full bg-green-600 py-2 rounded hover:bg-green-700"
+          className="w-full bg-green-600 py-2.5 rounded hover:bg-green-900 text-lg"
         >
           Create Room
         </button>
 
-        <div className="text-center text-sm text-gray-300">OR</div>
+        <div className="text-center text-xl text-gray-300">OR</div>
 
         <input
           type="text"
@@ -54,12 +59,12 @@ export default function RoomSelector() {
             setRoomIdInput(e.target.value);
             setError("");
           }}
-          className="w-full px-3 py-2 rounded text-black"
+          className="w-full px-3 py-2.5 rounded text-black text-lg"
         />
 
         <button
           onClick={handleJoinRoom}
-          className="w-full bg-blue-600 py-2 rounded hover:bg-blue-700"
+          className="w-full bg-blue-600 py-2.5 rounded hover:bg-blue-700 text-lg"
         >
           Join Room
         </button>
