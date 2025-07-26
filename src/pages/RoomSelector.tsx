@@ -38,18 +38,26 @@ export default function RoomSelector() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-900 text-white p-4">
-      <h1 className="text-3xl mb-6 font-bold">OPE Plan Poker</h1>
+    <div
+      className="min-h-screen bg-cover bg-center text-white"
+      style={{ backgroundImage: `url('/batman-bg.jpg')` }}
+    >
+      <div className="backdrop-blur-sm min-h-screen bg-black/70">
+      <div className="w-full py-4 px-6 bg-gray-800 text-white text-xl font-bold">
+        Plan Poker
+      </div>
+      <div className="flex flex-col items-center justify-center p-4 mt-20">
+      <h1 className="text-3xl mb-6 font-bold text-white/80">OPE Plan Poker</h1>
 
-      <div className="space-y-4 w-full max-w-lg">
+      <div className="space-y-4 w-full max-w-lg bg-white/60 border border-gray-400 rounded-lg p-6 backdrop-blur-sm">
         <button
           onClick={handleCreateRoom}
-          className="w-full bg-green-600 py-2.5 rounded hover:bg-green-900 text-lg"
+          className="w-full bg-green-700 py-2.5 rounded hover:bg-green-900 text-lg"
         >
           Create Room
         </button>
 
-        <div className="text-center text-xl text-gray-300">OR</div>
+        <div className="text-center text-xl text-gray-700 font-bold">OR</div>
 
         <input
           type="text"
@@ -64,13 +72,20 @@ export default function RoomSelector() {
 
         <button
           onClick={handleJoinRoom}
-          className="w-full bg-blue-600 py-2.5 rounded hover:bg-blue-700 text-lg"
+          className="w-full bg-blue-700 py-2.5 rounded hover:bg-blue-900 text-lg"
         >
           Join Room
         </button>
 
         {error && <p className="text-red-400 text-sm text-center">{error}</p>}
       </div>
+      </div>
     </div>
+    <footer className="fixed bottom-0 w-full text-center text-white text-m py-5 bg-gray-700 border-t border-gray-600">
+  © {new Date().getFullYear()} Plan Poker by Omkar. All rights reserved.
+</footer>
+
+
+</div>
   );
 }
